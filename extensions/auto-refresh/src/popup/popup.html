@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NBD Auto Refresh</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <div class="row">
+        <label class="switch" for="enabled">
+          <input type="checkbox" id="enabled" />
+          <span id="enabled-label"></span>
+        </label>
+      </div>
+
+      <div class="row">
+        <label for="cadence" id="cadence-label"></label>
+        <select id="cadence"></select>
+      </div>
+
+      <div class="row">
+        <label class="check" for="bypass">
+          <input type="checkbox" id="bypass" />
+          <span id="bypass-label"></span>
+        </label>
+        <p class="hint" id="bypass-hint"></p>
+      </div>
+
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+
+      <div class="notice" id="notice" hidden>
+        <p id="notice-text"></p>
+        <button type="button" id="notice-dismiss"></button>
+      </div>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

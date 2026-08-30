@@ -3,3 +3,6 @@ dist/
 coverage/
 releases/
 pnpm-lock.yaml
+extensions/*/dist/
+extensions/*/public/icons/
+store/make-icons.py

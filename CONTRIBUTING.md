@@ -14,7 +14,7 @@ Node 22+ required.
 
 ## Before opening a PR
 
-- `npm run check` passes.
+- `npm run check` passes, including the 80% coverage threshold.
 - New behavior has a test that fails without your change.
 - User-visible strings are in `_locales`, not inline.
 - Your PR describes how you verified the change.

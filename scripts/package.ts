@@ -2,28 +2,15 @@
  * Build an extension and zip it for Chrome Web Store upload.
  *
  * Usage: npm run package -- <extension-name>
- *
- * The Web Store expects a zip of the *contents* of the build output, not a zip
- * containing the folder. Getting this wrong produces a confusing rejection, so
- * it is enforced here rather than left to whoever is doing the upload.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+import { assertValidExtensionName, extensionDir, repoRoot } from './extensions.js';
 
-/** Extension names are used as directory names and in zip filenames. */
-export function assertValidExtensionName(name: string): void {
-  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
-    throw new Error(
-      `Invalid extension name "${name}". Use lowercase letters, digits and hyphens, starting with a letter.`,
-    );
-  }
-}
-
-/** Release artifacts are named so the tag, the zip and the store version line up. */
+/** Release artifacts are named so the tag, the zip and the store version agree. */
 export function releaseFileName(name: string, version: string): string {
   return `${name}-${version}.zip`;
 }
@@ -50,41 +37,71 @@ export function readManifestVersion(manifestJson: string): string {
   return version;
 }
 
-function main(): void {
-  const name = process.argv[2];
-  if (!name) {
-    console.error('Usage: npm run package -- <extension-name>');
-    process.exit(1);
-  }
+/**
+ * npm resolves --workspace by package name or by path, never by directory name
+ * alone. Exported so the shape is pinned by a test rather than discovered at
+ * release time.
+ */
+export function buildArgs(name: string): readonly string[] {
   assertValidExtensionName(name);
+  return ['run', 'build', '--workspace', `extensions/${name}`];
+}
 
-  const extensionDir = join(repoRoot, 'extensions', name);
-  if (!existsSync(extensionDir)) {
+/**
+ * Archives '.' — combined with a cwd of dist/, that puts the manifest at the
+ * root of the zip. A zip containing the folder is rejected by the Web Store,
+ * and the failure message does not explain why, so this shape is pinned.
+ */
+export function zipArgs(outFile: string): readonly string[] {
+  return ['-r', '-q', '-X', outFile, '.'];
+}
+
+export interface PackageOptions {
+  readonly root?: string;
+  readonly runBuild?: (name: string, root: string) => void;
+}
+
+function npmBuild(name: string, root: string): void {
+  execFileSync('npm', [...buildArgs(name)], { cwd: root, stdio: 'inherit' });
+}
+
+/** Returns the path of the zip that was written. */
+export function packageExtension(name: string, options: PackageOptions = {}): string {
+  const root = options.root ?? repoRoot;
+  const runBuild = options.runBuild ?? npmBuild;
+
+  const dir = extensionDir(name, root);
+  if (!existsSync(dir)) {
     throw new Error(`No extension at extensions/${name}`);
   }
 
-  execFileSync('npm', ['run', 'build', '--workspace', name], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-  });
+  runBuild(name, root);
 
-  const distDir = join(extensionDir, 'dist');
+  const distDir = join(dir, 'dist');
   const manifestPath = join(distDir, 'manifest.json');
   if (!existsSync(manifestPath)) {
     throw new Error(`Build produced no manifest at extensions/${name}/dist/manifest.json`);
   }
 
   const version = readManifestVersion(readFileSync(manifestPath, 'utf8'));
-  const releasesDir = join(repoRoot, 'releases');
+  const releasesDir = join(root, 'releases');
   mkdirSync(releasesDir, { recursive: true });
 
   const outFile = join(releasesDir, releaseFileName(name, version));
   rmSync(outFile, { force: true });
+  execFileSync('zip', [...zipArgs(outFile)], { cwd: distDir, stdio: 'inherit' });
 
-  // Run from inside dist/ so the archive contains the contents, not the folder.
-  execFileSync('zip', ['-r', '-q', '-X', outFile, '.'], { cwd: distDir, stdio: 'inherit' });
+  return outFile;
+}
 
-  console.log(`Packaged ${name} ${version} -> releases/${releaseFileName(name, version)}`);
+function main(): void {
+  const name = process.argv[2];
+  if (!name) {
+    console.error('Usage: npm run package -- <extension-name>');
+    process.exit(1);
+  }
+  const outFile = packageExtension(name);
+  console.log(`Packaged ${name} -> ${relative(repoRoot, outFile)}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -1,0 +1,80 @@
+{
+  "extensionName": {
+    "message": "NBD Auto Refresh"
+  },
+  "extensionDescription": {
+    "message": "Automatically reload the current tab on a schedule you choose."
+  },
+  "enableLabel": {
+    "message": "Auto refresh this tab"
+  },
+  "cadenceLabel": {
+    "message": "Refresh every"
+  },
+  "bypassCacheLabel": {
+    "message": "Bypass cache"
+  },
+  "bypassCacheHint": {
+    "message": "Fetch a fresh copy instead of using the cached page."
+  },
+  "statusOff": {
+    "message": "Off"
+  },
+  "statusNext": {
+    "message": "Next refresh in $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "24s"
+      }
+    }
+  },
+  "statusSoon": {
+    "message": "Refreshing now"
+  },
+  "cadenceSeconds": {
+    "message": "$COUNT$ sec",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "30"
+      }
+    }
+  },
+  "cadenceMinutes": {
+    "message": "$COUNT$ min",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "cadenceHours": {
+    "message": "$COUNT$ hr",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
+  "secondsShort": {
+    "message": "$COUNT$s",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "24"
+      }
+    }
+  },
+  "formDataWarning": {
+    "message": "Reloading discards anything you have typed into the page."
+  },
+  "dismiss": {
+    "message": "Got it"
+  },
+  "noTab": {
+    "message": "No tab to refresh."
+  }
+}
