@@ -96,14 +96,22 @@ which word was chosen.
 
 ## Testing
 
+- **Coverage must stay at or above 80%** for lines, statements, branches and
+  functions. `npm run check` enforces it, so a drop fails the build rather than
+  being noticed later.
 - `src/lib/` is pure and gets real unit tests. Push logic there so it can be
   tested without a browser.
 - Each extension has a manifest test asserting the invariants above.
-- Each extension has one Playwright smoke test: load unpacked, drive the popup,
-  assert the observable behavior.
+- The service worker and popup are tested together against
+  `tests/fake-chrome.ts`, an in-memory stand-in for the chrome API. Testing them
+  as a pair is deliberate: the seam between them is what breaks, and a mock on
+  either side would hide exactly that.
+- Each extension gets one Playwright smoke test: load unpacked, drive the popup,
+  assert the observable behavior. _(Not yet written — see the repo TODO.)_
 
 Do not mock your way to a green build. If a test needs the `chrome` API, use the
-shared fake; if it needs a browser, use the smoke test.
+fake; if it needs real service-worker termination or real alarm timing, that
+belongs in the smoke test, not in a unit test that pretends.
 
 ## Definition of done
 
