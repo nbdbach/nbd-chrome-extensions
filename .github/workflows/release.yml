@@ -1,0 +1,45 @@
+name: Release
+
+# Tag format: <extension-name>@<version>, e.g. auto-refresh@1.0.0
+on:
+  push:
+    tags:
+      - '*@*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Parse tag
+        id: tag
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "name=${TAG%@*}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#*@}" >> "$GITHUB_OUTPUT"
+
+      - run: npm run check
+
+      - run: npm run package -- "${{ steps.tag.outputs.name }}"
+
+      # The attached zip is the artifact submitted to the Web Store, so anyone
+      # can rebuild from this tag and compare.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            releases/*.zip

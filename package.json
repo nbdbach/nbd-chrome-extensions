@@ -1,0 +1,37 @@
+{
+  "name": "nbd-chrome-extensions",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Small, unintrusive, open-source Chrome extensions.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "extensions/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "typecheck": "tsc --noEmit -p tsconfig.json && npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run --passWithNoTests",
+    "build": "npm run build --workspaces --if-present",
+    "package": "tsx scripts/package.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/chrome": "^0.0.300",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.1.11"
+  }
+}
