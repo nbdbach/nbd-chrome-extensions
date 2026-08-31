@@ -22,16 +22,24 @@ jobs:
 
       - run: npm ci
 
+      # Parsing lives in scripts/release-tag.ts so it is unit tested rather
+      # than living only in this file.
       - name: Parse tag
         id: tag
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-          echo "name=${TAG%@*}" >> "$GITHUB_OUTPUT"
-          echo "version=${TAG#*@}" >> "$GITHUB_OUTPUT"
+        run: npx tsx scripts/release-tag.ts parse "$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
 
       - run: npm run check
 
       - run: npm run package -- "${{ steps.tag.outputs.name }}"
+
+      # Nothing is published unless the artifact's own version matches the tag.
+      # Without this, tagging a commit whose manifest was never bumped ships a
+      # build labelled with the previous version, and the first place anyone
+      # notices is the store listing.
+      - name: Verify the packaged version matches the tag
+        run: |
+          npx tsx scripts/release-tag.ts verify "$GITHUB_REF_NAME" \
+            "extensions/${{ steps.tag.outputs.name }}/dist/manifest.json"
 
       # The attached zip is the artifact submitted to the Web Store, so anyone
       # can rebuild from this tag and compare.
