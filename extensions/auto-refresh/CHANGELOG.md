@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — 2026-08-31
 
 - The cadence is now entered as an interval and a unit ("10 minutes") instead of
   picked from a fixed list, so any whole interval from 30 seconds to 24 hours is
