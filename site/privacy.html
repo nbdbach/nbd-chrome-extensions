@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — NBD Auto Refresh</title>
+    <meta
+      name="description"
+      content="NBD Auto Refresh collects nothing. No data leaves your browser."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <p class="back"><a href="./">NBD Auto Refresh</a></p>
+
+      <h1>Privacy Policy</h1>
+      <p class="meta">Last updated 31 August 2026</p>
+
+      <p class="lede">NBD Auto Refresh collects nothing.</p>
+
+      <h2>What is not collected</h2>
+      <ul>
+        <li>No personal or identifying information.</li>
+        <li>No browsing history, page content, page titles, or URLs.</li>
+        <li>No analytics, telemetry, crash reporting, or usage statistics.</li>
+        <li>No advertising or tracking identifiers.</li>
+      </ul>
+
+      <h2>What is stored, and where</h2>
+      <p>The extension keeps two things in your own browser, using Chrome's storage API:</p>
+      <ul>
+        <li>The refresh interval and options you last chose.</li>
+        <li>Which tabs are currently set to refresh, for the current browser session.</li>
+      </ul>
+      <p>
+        Both stay on your device. Neither is transmitted anywhere, and both are removed when you
+        uninstall the extension.
+      </p>
+
+      <h2>Network access</h2>
+      <p>
+        The extension makes no network requests of any kind. It loads no remote scripts, no external
+        fonts, and no remote configuration. It reloads the tab you point it at, and that request
+        goes from your browser to that site exactly as it would if you pressed the reload button
+        yourself.
+      </p>
+
+      <h2>Permissions</h2>
+      <dl>
+        <dt><code>alarms</code></dt>
+        <dd>Schedules the periodic reload you configure.</dd>
+        <dt><code>storage</code></dt>
+        <dd>Remembers the settings described above.</dd>
+      </dl>
+      <p>
+        That is the entire list. The extension requests no host permissions, injects no content
+        scripts into pages, and cannot read the content of any page you visit. It does not request
+        the <code>tabs</code> permission, which is what would let it read your browsing history.
+      </p>
+
+      <h2>Third parties</h2>
+      <p>
+        There are none. No data is shared, sold, or transferred, because none is collected. The
+        extension has no server component.
+      </p>
+
+      <h2>Verifying this</h2>
+      <p>
+        The extension is open source under the MIT licence. Every release is built from a public
+        tag, and the exact package submitted to the Chrome Web Store is attached to that release, so
+        you can rebuild it yourself and compare.
+      </p>
+      <p>
+        <a href="https://github.com/nbdbach/nbd-chrome-extensions"
+          >github.com/nbdbach/nbd-chrome-extensions</a
+        >
+      </p>
+
+      <h2>Changes</h2>
+      <p>
+        If this policy ever changes, the revision will be visible in the repository's commit history
+        alongside the date above.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions or concerns:
+        <a href="https://github.com/nbdbach/nbd-chrome-extensions/issues">open an issue</a>. For
+        security reports, please use
+        <a href="https://github.com/nbdbach/nbd-chrome-extensions/security/advisories/new"
+          >private vulnerability reporting</a
+        >
+        rather than a public issue.
+      </p>
+    </main>
+  </body>
+</html>

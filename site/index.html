@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NBD Auto Refresh</title>
+    <meta
+      name="description"
+      content="Automatically reload the current tab on a schedule you choose. No permission warnings, no network requests, no tracking."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>NBD Auto Refresh</h1>
+      <p class="lede">Automatically reload the current tab on a schedule you choose.</p>
+
+      <p>
+        Turn it on for the tab you are watching — a dashboard, a build, a queue, a live score — and
+        every other tab is left alone. Pick a cadence from 30 seconds to an hour, watch the
+        countdown, turn it off when you are done.
+      </p>
+
+      <h2>Why this one</h2>
+      <ul>
+        <li>
+          <strong>No permission warnings.</strong> It asks for <code>alarms</code> and
+          <code>storage</code>. That is the whole list. It never requests permission to read your
+          browsing history, and it cannot read the content of any page.
+        </li>
+        <li>
+          <strong>No network requests.</strong> No analytics, no telemetry, no remote configuration,
+          no external fonts.
+        </li>
+        <li><strong>Per tab, not global.</strong> Enabling it on one tab never touches another.</li>
+        <li><strong>Small.</strong> Under 20KB of readable, unminified JavaScript.</li>
+        <li>
+          <strong>Open source, MIT.</strong> Every release is built from a public tag, with the
+          exact submitted package attached to it.
+        </li>
+      </ul>
+
+      <p class="note">
+        One caveat worth knowing: reloading a page discards anything you have typed into it. The
+        extension tells you so the first time you turn it on.
+      </p>
+
+      <h2>Links</h2>
+      <ul class="links">
+        <li><a href="https://github.com/nbdbach/nbd-chrome-extensions">Source on GitHub</a></li>
+        <li><a href="privacy.html">Privacy policy</a></li>
+        <li>
+          <a href="https://github.com/nbdbach/nbd-chrome-extensions/issues">Report an issue</a>
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,125 @@
+/* Self-contained on purpose: no webfonts, no CDNs, nothing that phones home.
+   A privacy policy served from a page that loads third-party assets would be
+   quietly contradicting itself. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1a2b22;
+  --muted: #55665e;
+  --line: #dfe6e1;
+  --accent: #2f6f4f;
+  --card: #f4f7f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141816;
+    --fg: #e6ece9;
+    --muted: #9fb0a8;
+    --line: #2d3833;
+    --accent: #7bbf9a;
+    --card: #1b211e;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    16px/1.65 system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 2.25rem 0 0.6rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+p,
+ul,
+dl {
+  margin: 0 0 1rem;
+}
+
+.lede {
+  font-size: 1.2rem;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
+}
+
+.meta,
+.back {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.back {
+  margin-bottom: 2rem;
+}
+
+ul {
+  padding-left: 1.2rem;
+}
+
+li {
+  margin-bottom: 0.4rem;
+}
+
+dt {
+  font-weight: 600;
+  margin-top: 0.6rem;
+}
+
+dd {
+  margin: 0 0 0.2rem 1.2rem;
+  color: var(--muted);
+}
+
+code {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--accent);
+}
+
+.note {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.links {
+  list-style: none;
+  padding: 0;
+}
