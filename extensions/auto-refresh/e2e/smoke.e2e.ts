@@ -91,8 +91,7 @@ test('resolves its UI strings through _locales in a real browser', async ({
   await expect(popup.locator('#enabled-label')).toHaveText('Auto refresh this tab');
   await expect(popup.locator('#cadence-label')).toHaveText('Refresh every');
   await expect(popup.locator('#status')).toHaveText('Off');
-  await expect(popup.locator('#cadence option').first()).toHaveText('30 sec');
-  await expect(popup.locator('#cadence option').last()).toHaveText('1 hr');
+  await expect(popup.locator('#unit option')).toHaveText(['seconds', 'minutes', 'hours']);
 });
 
 test('enabling schedules an alarm Chrome accepts at the production floor', async ({
@@ -105,7 +104,9 @@ test('enabling schedules an alarm Chrome accepts at the production floor', async
     await target.goto(site.url);
 
     const popup = await openPopupFor(context, extensionId, target);
-    await popup.locator('#cadence').selectOption('30');
+    await popup.locator('#unit').selectOption('seconds');
+    await popup.locator('#interval').fill('30');
+    await popup.locator('#interval').blur();
     await popup.locator('#enabled').check();
 
     const worker = context.serviceWorkers()[0]!;
@@ -184,6 +185,34 @@ test('closing the tab stops refreshing it', async ({ context, extensionId }) => 
 
     await target.close();
     await expect.poll(() => alarmNames(worker)).toHaveLength(0);
+  } finally {
+    site.close();
+  }
+});
+
+test('an interval below the floor is refused in a real browser', async ({
+  context,
+  extensionId,
+}) => {
+  const site = await startCountingServer();
+  try {
+    const target = await context.newPage();
+    await target.goto(site.url);
+
+    const popup = await openPopupFor(context, extensionId, target);
+    await popup.locator('#unit').selectOption('seconds');
+    await popup.locator('#interval').fill('10');
+    await popup.locator('#interval').blur();
+
+    await expect(popup.locator('#cadence-error')).toBeVisible();
+
+    // The toggle is refused outright rather than flipping and snapping back.
+    await expect(popup.locator('#enabled')).toBeDisabled();
+    expect(await alarmNames(context.serviceWorkers()[0]!)).toHaveLength(0);
+
+    await popup.locator('#interval').fill('45');
+    await popup.locator('#interval').blur();
+    await expect(popup.locator('#enabled')).toBeEnabled();
   } finally {
     site.close();
   }

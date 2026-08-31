@@ -38,8 +38,8 @@ const SHOTS: readonly Shot[] = [
   {
     name: '2-cadence',
     state: 'running',
-    headline: 'From 30 seconds to an hour',
-    sub: 'Pick a cadence and see exactly when the next reload lands.',
+    headline: 'Any interval, 30 seconds to 24 hours',
+    sub: 'Type a number, pick a unit, and see exactly when the next reload lands.',
   },
   {
     name: '3-no-surprises',

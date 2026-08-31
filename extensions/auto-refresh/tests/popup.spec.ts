@@ -68,21 +68,24 @@ describe('markup is wired to _locales, never to inline English', () => {
     expect($('notice-text').textContent).toBe('formDataWarning');
   });
 
-  it('offers every preset cadence, labelled by its largest unit', () => {
-    const options = [...$<HTMLSelectElement>('cadence').options];
-    expect(options.map((option) => option.value)).toEqual([
-      '30',
-      '60',
-      '120',
-      '300',
-      '600',
-      '900',
-      '1800',
-      '3600',
+  it('offers the three units, labelled from _locales', () => {
+    const options = [...$<HTMLSelectElement>('unit').options];
+    expect(options.map((option) => option.value)).toEqual(['seconds', 'minutes', 'hours']);
+    expect(options.map((option) => option.textContent)).toEqual([
+      'unitSeconds',
+      'unitMinutes',
+      'unitHours',
     ]);
-    expect(options[0]?.textContent).toBe('cadenceSeconds(30)');
-    expect(options[3]?.textContent).toBe('cadenceMinutes(5)');
-    expect(options[7]?.textContent).toBe('cadenceHours(1)');
+  });
+
+  it('shows the stored cadence split into interval and unit', () => {
+    expect($<HTMLInputElement>('interval').value).toBe('1');
+    expect($<HTMLSelectElement>('unit').value).toBe('minutes');
+  });
+
+  it('labels both fields for screen readers', () => {
+    expect($('interval').getAttribute('aria-label')).toBe('intervalLabel');
+    expect($('unit').getAttribute('aria-label')).toBe('unitLabel');
   });
 
   it('starts off', () => {
@@ -97,7 +100,8 @@ describe('with no addressable tab', () => {
     await vi.waitFor(() => expect($('status').textContent).toBe('noTab'));
 
     expect($<HTMLInputElement>('enabled').disabled).toBe(true);
-    expect($<HTMLSelectElement>('cadence').disabled).toBe(true);
+    expect($<HTMLInputElement>('interval').disabled).toBe(true);
+    expect($<HTMLSelectElement>('unit').disabled).toBe(true);
     expect($<HTMLInputElement>('bypass').disabled).toBe(true);
   });
 });
@@ -152,20 +156,45 @@ describe('changing the cadence', () => {
     toggle.checked = true;
     await change(toggle);
 
-    const select = $<HTMLSelectElement>('cadence');
-    select.value = '300';
-    await change(select);
+    const interval = $<HTMLInputElement>('interval');
+    interval.value = '10';
+    await change(interval);
 
-    expect(fake.alarms.all.get('refresh:7')?.periodInMinutes).toBe(5);
+    expect(fake.alarms.all.get('refresh:7')?.periodInMinutes).toBe(10);
   });
 
   it('is remembered for the next tab even while off', async () => {
-    const select = $<HTMLSelectElement>('cadence');
-    select.value = '900';
-    await change(select);
+    const interval = $<HTMLInputElement>('interval');
+    interval.value = '15';
+    await change(interval);
 
     expect(fake.storage.local.data.get('prefs')).toMatchObject({ cadenceSeconds: 900 });
     expect(fake.alarms.all.size).toBe(0);
+  });
+
+  it('converts the unit as well as the number', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+    interval.value = '2';
+    await change(interval);
+    unit.value = 'hours';
+    await change(unit);
+
+    expect(fake.storage.local.data.get('prefs')).toMatchObject({ cadenceSeconds: 7200 });
+  });
+
+  it('adjusts the number field bounds to the chosen unit', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+
+    unit.value = 'seconds';
+    await change(unit);
+    expect(interval.min).toBe('30');
+
+    unit.value = 'hours';
+    await change(unit);
+    expect(interval.min).toBe('1');
+    expect(interval.max).toBe('24');
   });
 });
 
@@ -212,5 +241,90 @@ describe('reopening the popup', () => {
     await flush();
 
     expect($('status').textContent).toMatch(/^statusNext\(/);
+  });
+});
+
+describe('an interval Chrome would not honour', () => {
+  it('is refused with an explanation rather than silently clamped', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+    unit.value = 'seconds';
+    await change(unit);
+    interval.value = '10';
+    await change(interval);
+
+    expect($('cadence-error').hidden).toBe(false);
+    expect($('cadence-error').textContent).toBe('cadenceTooShort');
+    expect(interval.classList.contains('invalid')).toBe(true);
+  });
+
+  it('cannot be turned on at all', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+    unit.value = 'seconds';
+    await change(unit);
+    interval.value = '10';
+    await change(interval);
+
+    expect($<HTMLInputElement>('enabled').disabled).toBe(true);
+  });
+
+  it('is never scheduled even if the toggle is forced', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+    unit.value = 'seconds';
+    await change(unit);
+    interval.value = '10';
+    await change(interval);
+
+    const toggle = $<HTMLInputElement>('enabled');
+    toggle.checked = true;
+    await change(toggle);
+
+    expect(fake.alarms.all.size).toBe(0);
+    expect(toggle.checked).toBe(false);
+  });
+
+  it('leaves a running refresh untouched while the field is unusable', async () => {
+    const toggle = $<HTMLInputElement>('enabled');
+    toggle.checked = true;
+    await change(toggle);
+    expect(fake.alarms.all.get('refresh:7')?.periodInMinutes).toBe(1);
+
+    const interval = $<HTMLInputElement>('interval');
+    interval.value = '0';
+    await change(interval);
+
+    // Still scheduled at the last good value, not cleared and not rescheduled,
+    // and the toggle stays usable so it can still be switched off.
+    expect(fake.alarms.all.get('refresh:7')?.periodInMinutes).toBe(1);
+    expect($('cadence-error').textContent).toBe('cadenceNotWhole');
+    expect($<HTMLInputElement>('enabled').disabled).toBe(false);
+  });
+
+  it('clears the message once the value is usable again', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+    unit.value = 'seconds';
+    await change(unit);
+    interval.value = '10';
+    await change(interval);
+    expect($('cadence-error').hidden).toBe(false);
+
+    interval.value = '45';
+    await change(interval);
+    expect($('cadence-error').hidden).toBe(true);
+    expect(interval.classList.contains('invalid')).toBe(false);
+  });
+
+  it('rejects more than 24 hours', async () => {
+    const unit = $<HTMLSelectElement>('unit');
+    const interval = $<HTMLInputElement>('interval');
+    unit.value = 'hours';
+    await change(unit);
+    interval.value = '25';
+    await change(interval);
+
+    expect($('cadence-error').textContent).toBe('cadenceTooLong');
   });
 });

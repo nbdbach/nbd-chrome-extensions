@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- The cadence is now entered as an interval and a unit ("10 minutes") instead of
+  picked from a fixed list, so any whole interval from 30 seconds to 24 hours is
+  available.
+- An interval Chrome would not honour is refused with an explanation rather than
+  silently clamped, and the toggle stays disabled until it is usable.
+
 ## 1.0.0 — 2026-08-31
 
 First public release.

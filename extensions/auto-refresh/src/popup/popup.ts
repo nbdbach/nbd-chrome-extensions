@@ -4,20 +4,34 @@
  */
 
 import {
-  CADENCE_PRESETS_SECONDS,
+  CADENCE_UNITS,
   DEFAULT_CADENCE_SECONDS,
-  cadenceLabel,
+  type Cadence,
+  type CadenceUnit,
+  checkCadence,
   formatRemaining,
+  fromSeconds,
+  isCadenceUnit,
+  maxInterval,
+  minInterval,
   normalizeCadence,
   secondsUntil,
+  toSeconds,
 } from '../lib/cadence.js';
 import type { Request, TargetState } from '../lib/messages.js';
 
 const PREFS_KEY = 'prefs';
-const UNIT_MESSAGE = {
-  seconds: 'cadenceSeconds',
-  minutes: 'cadenceMinutes',
-  hours: 'cadenceHours',
+
+const UNIT_MESSAGE: Readonly<Record<CadenceUnit, string>> = {
+  seconds: 'unitSeconds',
+  minutes: 'unitMinutes',
+  hours: 'unitHours',
+};
+
+const PROBLEM_MESSAGE = {
+  'not-a-whole-number': 'cadenceNotWhole',
+  'too-short': 'cadenceTooShort',
+  'too-long': 'cadenceTooLong',
 } as const;
 
 interface Prefs {
@@ -65,9 +79,11 @@ async function activeTabId(): Promise<number | null> {
 
 function main(): void {
   const enabledInput = el<HTMLInputElement>('enabled');
-  const cadenceSelect = el<HTMLSelectElement>('cadence');
+  const intervalInput = el<HTMLInputElement>('interval');
+  const unitSelect = el<HTMLSelectElement>('unit');
   const bypassInput = el<HTMLInputElement>('bypass');
   const statusText = el<HTMLParagraphElement>('status');
+  const errorText = el<HTMLParagraphElement>('cadence-error');
   const notice = el<HTMLDivElement>('notice');
   const noticeDismiss = el<HTMLButtonElement>('notice-dismiss');
 
@@ -77,13 +93,14 @@ function main(): void {
   el('bypass-hint').textContent = t('bypassCacheHint');
   el('notice-text').textContent = t('formDataWarning');
   noticeDismiss.textContent = t('dismiss');
+  intervalInput.setAttribute('aria-label', t('intervalLabel'));
+  unitSelect.setAttribute('aria-label', t('unitLabel'));
 
-  for (const seconds of CADENCE_PRESETS_SECONDS) {
-    const { unit, count } = cadenceLabel(seconds);
+  for (const unit of CADENCE_UNITS) {
     const option = document.createElement('option');
-    option.value = String(seconds);
-    option.textContent = t(UNIT_MESSAGE[unit], [String(count)]);
-    cadenceSelect.append(option);
+    option.value = unit;
+    option.textContent = t(UNIT_MESSAGE[unit]);
+    unitSelect.append(option);
   }
 
   let tabId: number | null = null;
@@ -94,6 +111,37 @@ function main(): void {
   };
   let state: TargetState | null = null;
   let ticking: ReturnType<typeof setInterval> | undefined;
+
+  function selectedUnit(): CadenceUnit {
+    return isCadenceUnit(unitSelect.value) ? unitSelect.value : 'minutes';
+  }
+
+  /** What the two fields currently say, whether or not it is usable. */
+  function typedCadence(): Cadence {
+    return { interval: Number(intervalInput.value), unit: selectedUnit() };
+  }
+
+  /** Keep the number field's own bounds in step with the chosen unit. */
+  function applyBounds(unit: CadenceUnit): void {
+    intervalInput.min = String(minInterval(unit));
+    intervalInput.max = String(maxInterval(unit));
+  }
+
+  function showProblem(): ReturnType<typeof checkCadence> {
+    const { interval, unit } = typedCadence();
+    const problem = checkCadence(interval, unit);
+    errorText.textContent = problem ? t(PROBLEM_MESSAGE[problem]) : '';
+    errorText.hidden = problem === null;
+    intervalInput.classList.toggle('invalid', problem !== null);
+
+    // Refuse the turn-on rather than letting it flip and snap back. A tab that
+    // is already refreshing keeps its toggle, so a half-typed number can never
+    // strand the user with no way to switch it off.
+    if (tabId !== null) {
+      enabledInput.disabled = problem !== null && !(state?.enabled ?? false);
+    }
+    return problem;
+  }
 
   function renderStatus(): void {
     if (!state?.enabled) {
@@ -110,11 +158,18 @@ function main(): void {
     statusText.textContent = t('statusNext', [text]);
   }
 
+  function showCadence(seconds: number): void {
+    const cadence = fromSeconds(seconds);
+    unitSelect.value = cadence.unit;
+    intervalInput.value = String(cadence.interval);
+    applyBounds(cadence.unit);
+  }
+
   function render(): void {
     enabledInput.checked = state?.enabled ?? false;
-    const cadence = state?.enabled ? state.cadenceSeconds : prefs.cadenceSeconds;
-    cadenceSelect.value = String(cadence);
+    showCadence(state?.enabled ? state.cadenceSeconds : prefs.cadenceSeconds);
     bypassInput.checked = state?.enabled ? state.bypassCache : prefs.bypassCache;
+    showProblem();
     renderStatus();
 
     clearInterval(ticking);
@@ -125,7 +180,15 @@ function main(): void {
 
   async function apply(): Promise<void> {
     if (tabId === null) return;
-    const cadenceSeconds = normalizeCadence(Number(cadenceSelect.value));
+
+    // An unusable interval is never sent on. Scheduling is left exactly as it
+    // was, so a half-typed number cannot silently change a running refresh.
+    if (showProblem() !== null) {
+      enabledInput.checked = state?.enabled ?? false;
+      return;
+    }
+
+    const cadenceSeconds = toSeconds(typedCadence());
     const bypassCache = bypassInput.checked;
 
     prefs = { ...prefs, cadenceSeconds, bypassCache };
@@ -135,11 +198,13 @@ function main(): void {
       ? await send({ type: 'enable', tabId, cadenceSeconds, bypassCache })
       : await send({ type: 'disable', tabId });
 
-    render();
+    renderStatus();
+    clearInterval(ticking);
+    if (state?.enabled) ticking = setInterval(renderStatus, 1000);
   }
 
   async function onEnabledChange(): Promise<void> {
-    if (enabledInput.checked && !prefs.seenFormDataWarning) {
+    if (enabledInput.checked && showProblem() === null && !prefs.seenFormDataWarning) {
       notice.hidden = false;
       prefs = { ...prefs, seenFormDataWarning: true };
       await writePrefs(prefs);
@@ -147,8 +212,14 @@ function main(): void {
     await apply();
   }
 
+  function onUnitChange(): void {
+    applyBounds(selectedUnit());
+    void apply();
+  }
+
   enabledInput.addEventListener('change', () => void onEnabledChange());
-  cadenceSelect.addEventListener('change', () => void apply());
+  intervalInput.addEventListener('change', () => void apply());
+  unitSelect.addEventListener('change', onUnitChange);
   bypassInput.addEventListener('change', () => void apply());
   noticeDismiss.addEventListener('click', () => {
     notice.hidden = true;
@@ -161,7 +232,8 @@ function main(): void {
     if (tabId === null) {
       statusText.textContent = t('noTab');
       enabledInput.disabled = true;
-      cadenceSelect.disabled = true;
+      intervalInput.disabled = true;
+      unitSelect.disabled = true;
       bypassInput.disabled = true;
       return;
     }

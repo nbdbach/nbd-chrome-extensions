@@ -15,8 +15,19 @@
       </div>
 
       <div class="row">
-        <label for="cadence" id="cadence-label"></label>
-        <select id="cadence"></select>
+        <label for="interval" id="cadence-label"></label>
+        <div class="cadence">
+          <input
+            type="number"
+            id="interval"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            autocomplete="off"
+          />
+          <select id="unit"></select>
+        </div>
+        <p class="error" id="cadence-error" role="alert" hidden></p>
       </div>
 
       <div class="row">
