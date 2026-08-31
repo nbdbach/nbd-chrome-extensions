@@ -105,30 +105,31 @@ extensions**, raised later based on account tenure and engagement.
 
 ## Step 2 — Publish the privacy policy
 
-The store requires a URL even when nothing is collected. GitHub Pages is fine —
-the repo is org-owned, so there is no future account transfer that would break
-the link.
+The store requires a policy URL even when nothing is collected. The pages are
+already written and live in `site/`, deployed by `.github/workflows/pages.yml`.
 
-1. In the repo, enable GitHub Pages (Settings -> Pages) or create a `gh-pages`
-   branch with a single `privacy.html`.
-2. Publish text to this effect, and nothing weaker:
+Only one thing is left, and it is a repository setting:
 
-   > NBD Auto Refresh collects nothing. No personal information, no browsing
-   > history, no page content or URLs, no analytics, no telemetry, and no
-   > network requests of any kind.
-   >
-   > The extension stores two things in your browser using Chrome's storage
-   > API: the refresh interval you last chose, and which tabs are currently
-   > refreshing. Both stay on your device, are never transmitted, and are
-   > removed when you uninstall.
-   >
-   > It requests two permissions: `alarms` to schedule reloads, and `storage`
-   > to remember the settings above. It requests no host permissions and
-   > injects no code into pages.
-   >
-   > Source: https://github.com/nbdbach/nbd-chrome-extensions
+1. Go to **Settings -> Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Run the **Pages** workflow — it fires on any push touching `site/`, or you
+   can trigger it by hand from the Actions tab (`workflow_dispatch`).
+4. The policy will be at:
 
-3. Confirm the URL loads in a private window before using it.
+   ```
+   https://nbdbach.github.io/nbd-chrome-extensions/privacy.html
+   ```
+
+5. Open that URL in a private window and confirm it loads before pasting it
+   into the store listing.
+
+The site is deployed by Actions rather than from a branch folder because
+branch-based Pages can only serve `/` or `/docs`, and `/docs` holds this repo's
+internal documentation rather than a website.
+
+`site/` contains a landing page, the privacy policy, and one stylesheet. It
+loads no webfonts, scripts, or third-party assets — a privacy policy served
+from a page that phones out would be contradicting itself.
 
 ## Step 3 — Regenerate the assets on macOS
 
