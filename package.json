@@ -19,10 +19,13 @@
     "format": "prettier --write .",
     "test": "vitest run --passWithNoTests --coverage",
     "build": "npm run build --workspaces --if-present",
-    "package": "tsx scripts/package.ts"
+    "package": "tsx scripts/package.ts",
+    "test:e2e": "npm run build --workspace extensions/auto-refresh && playwright test",
+    "store:assets": "npm run build --workspace extensions/auto-refresh && tsx extensions/auto-refresh/store/capture-assets.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.62.1",
     "@types/chrome": "^0.0.300",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^4.1.11",

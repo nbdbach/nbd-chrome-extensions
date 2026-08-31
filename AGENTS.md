@@ -21,18 +21,26 @@ code more than any style rule:
 
 ```bash
 npm install          # once
-npm run check        # typecheck + lint + test + build — the one command that matters
+npm run check        # typecheck + lint + test + coverage + build
+npm run test:e2e     # drives a real Chrome; needs `npx playwright install chromium`
 npm run typecheck
 npm run lint
 npm run format       # writes; lint only checks
 npm run test
 npm run build
-npm run new          # scaffold a new extension
 npm run package -- <name>   # build + zip for Web Store upload
 ```
 
-`npm run check` is exactly what CI runs. If it passes locally it passes in CI.
-Never add a CI step that has no local equivalent.
+Two commands, two jobs, and both are required checks:
+
+- **`npm run check` proves health.** Fast (seconds), run it constantly. This is
+  exactly what the CI job runs.
+- **`npm run test:e2e` proves it in a real browser.** Slow — it downloads and
+  launches Chrome — so it is deliberately not part of `check`, and runs as its
+  own CI job.
+
+Never add a CI step that has no local equivalent. A check nobody can run
+locally is a check nobody fixes.
 
 ## Layout
 

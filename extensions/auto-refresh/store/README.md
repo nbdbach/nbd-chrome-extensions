@@ -1,18 +1,41 @@
 # Store assets
 
-Everything needed for the Chrome Web Store listing lives here.
+Everything for the Chrome Web Store listing lives here. Assets are **generated**,
+not hand-edited, so they can be regenerated the moment the popup changes — which
+is the only way listing images stay honest.
 
-- `make-icons.py` — generates `public/icons/*.png` from stdlib Python. No image
-  library, nothing to audit. Re-run after changing the mark.
+```bash
+npm run store:assets    # screenshots + promo tile, from the real extension
+python3 store/make-icons.py   # the extension icons (stdlib only)
+```
 
-## Still to produce before submission
+`store:assets` needs a Playwright browser: `npx playwright install chromium`.
+Set `CHROMIUM_PATH` to reuse an existing Chromium instead.
 
-- [ ] Screenshots, 1280x800, 1-5 of them (generate with Playwright so they
-      regenerate when the popup changes)
-- [ ] Small promo tile, 440x280
-- [ ] Marquee promo tile, 1400x560 (optional)
-- [ ] Listing copy: summary under 132 characters, detailed description
-- [ ] Privacy policy URL
+## Generated
+
+| File                                   | Size     | Store slot       |
+| -------------------------------------- | -------- | ---------------- |
+| `assets/screenshot-1-per-tab.png`      | 1280x800 | screenshot       |
+| `assets/screenshot-2-cadence.png`      | 1280x800 | screenshot       |
+| `assets/screenshot-3-no-surprises.png` | 1280x800 | screenshot       |
+| `assets/screenshot-4-permissions.png`  | 1280x800 | screenshot       |
+| `assets/promo-tile-440x280.png`        | 440x280  | small promo tile |
+| `../public/icons/icon-128.png`         | 128x128  | store icon       |
+
+The screenshots are composed: the popup is captured at 2x from a real Chrome
+with the extension loaded, then placed on a frame rendered at exactly the size
+the store requires. Nothing in them is mocked up.
+
+Fonts come from the machine that runs the script, so regenerate on macOS if you
+want macOS type rendering.
+
+## Still to write
+
+- [ ] Item summary, 132 characters or fewer
+- [ ] Detailed description, opening with the single-purpose sentence
+- [ ] Privacy policy URL (this extension collects nothing — say exactly that)
+- [ ] Optional: 1400x560 marquee tile, YouTube link
 
 ## Single purpose
 
