@@ -17,10 +17,14 @@ that the popup says "this tab" rather than naming the page. Worth it.
 
 ## Cadence
 
+Enter any whole interval and a unit — 45 seconds, 10 minutes, 2 hours — up to a
+maximum of 24 hours.
+
 Chrome enforces a 30 second minimum on alarm periods in published extensions.
 Unpacked development builds have no such limit, so anything faster works locally
 and silently degrades once installed from the store. 30 seconds is the floor
-here, deliberately.
+here, deliberately, and an interval below it is refused with an explanation
+rather than quietly rounded up to something you did not ask for.
 
 ## Development
 

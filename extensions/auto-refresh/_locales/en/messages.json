@@ -32,33 +32,6 @@
   "statusSoon": {
     "message": "Refreshing now"
   },
-  "cadenceSeconds": {
-    "message": "$COUNT$ sec",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "30"
-      }
-    }
-  },
-  "cadenceMinutes": {
-    "message": "$COUNT$ min",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "5"
-      }
-    }
-  },
-  "cadenceHours": {
-    "message": "$COUNT$ hr",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1"
-      }
-    }
-  },
   "secondsShort": {
     "message": "$COUNT$s",
     "placeholders": {
@@ -76,5 +49,29 @@
   },
   "noTab": {
     "message": "No tab to refresh."
+  },
+  "intervalLabel": {
+    "message": "Interval"
+  },
+  "unitLabel": {
+    "message": "Unit"
+  },
+  "unitSeconds": {
+    "message": "seconds"
+  },
+  "unitMinutes": {
+    "message": "minutes"
+  },
+  "unitHours": {
+    "message": "hours"
+  },
+  "cadenceNotWhole": {
+    "message": "Enter a whole number of 1 or more."
+  },
+  "cadenceTooShort": {
+    "message": "Chrome does not allow refreshing faster than every 30 seconds."
+  },
+  "cadenceTooLong": {
+    "message": "The longest interval is 24 hours."
   }
 }
